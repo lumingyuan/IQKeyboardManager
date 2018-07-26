@@ -59,33 +59,23 @@
 
 -(UIViewController *)topMostController
 {
-    NSMutableArray<UIViewController*> *controllersHierarchy = [[NSMutableArray alloc] init];
-    
-    UIViewController *topController = self.window.rootViewController;
-    
-    if (topController)
-    {
-        [controllersHierarchy addObject:topController];
+    UIViewController  *rootController = [UIApplication  sharedApplication].keyWindow.rootViewController;
+    if ([rootController isKindOfClass:[UITabBarController class]]) {
+        UITabBarController *tabBarController = (UITabBarController *)rootController;
+        UINavigationController *navController = tabBarController.selectedViewController;
+        UIViewController *viewController = (UIViewController *)navController.visibleViewController;
+        while (viewController.presentedViewController) {
+            viewController = (UIViewController *)viewController.presentedViewController;
+        }
+        return viewController;
+    } else if ([rootController isKindOfClass:[UINavigationController class]]) {
+        UINavigationController *navController = (UINavigationController *)rootController;
+        return navController.visibleViewController;
+    } else if ([rootController isKindOfClass:[UIViewController class]]) {
+        return rootController;
+    } else {
+        return nil;
     }
-    
-    while ([topController presentedViewController]) {
-        
-        topController = [topController presentedViewController];
-        [controllersHierarchy addObject:topController];
-    }
-    
-    UIViewController *matchController = [self viewContainingController];
-    
-    while (matchController && [controllersHierarchy containsObject:matchController] == NO)
-    {
-        do
-        {
-            matchController = (UIViewController*)[matchController nextResponder];
-            
-        } while (matchController && [matchController isKindOfClass:[UIViewController class]] == NO);
-    }
-    
-    return matchController;
 }
 
 -(UIViewController *)parentContainerViewController
